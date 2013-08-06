@@ -5,22 +5,22 @@ macroScript Wood_turner
 			Icon:#("UVWUnwrapTools",7)
 
 (
-rollout woodTurner_roll "WOOD TURNER 1.1" (
+rollout woodTurner_roll "WOOD TURNER 1.2" (
 
 	group "UVW Map settings" (
-		edittext uvw_height "Height:" fieldWidth:110 labelOnTop:false text:"4000"  	
+		spinner uvw_height "Height:" range: [0,10000,4000] type:#integer align:#left	
 	)	
 	
 	group "Cylinder settings" (
-		edittext cylinder_sides "Sides:" fieldWidth:100 labelOnTop:false text:"18"
-		edittext cylinder_segs "Segs:" fieldWidth:100 labelOnTop:false text:"1"
+		spinner cylinder_sides  "Sides:"  range:[0,100,18] type:#integer align:#left	
+		spinner  cylinder_segs "Segs:"  range:[0,100,1] type:#integer align:#left	
 		button btn_getCylParam  "Get parameters" width:150	
 	)
 
 	group "Material settings" (
-		edittext material_number "Material №:" fieldWidth:85 labelOnTop:false text:"1"
-		edittext material_id1 "ID 1:" fieldWidth:120 labelOnTop:false text:"1"
-		edittext material_id2 "ID 2:" fieldWidth:120 labelOnTop:false text:"2"
+		spinner  material_number "Material №:" range:[0,100,1] type:#integer align:#left	
+		spinner material_id1 "ID 1:"  range:[0,100,1] type:#integer align:#left	
+		spinner material_id2 "ID 2:"  range:[0,100,2] type:#integer align:#left
 	)	
 	
 	group "Rotate settings" (		
@@ -41,57 +41,12 @@ rollout woodTurner_roll "WOOD TURNER 1.1" (
 		button btn_undo  "UnDo" width:150	
 	)
 	
-	on btn_getCylParam  pressed do(
-		try (
-			cylinder_sides.text = $.sides as string
-			cylinder_segs.text = $.heightsegs as string
-		)
-		catch (
-			messagebox "Unknown selected object."
-		)
-	)
+----------------------------------------------------------------------------FUNCTIONS--------------------------------------------------------------------
 
-	on btn_go pressed do(	
-		
-
-		if rotate_only.state !=true then (
-		modPanel.addModToSelection (Edit_Poly ()) ui:on
-			
-		subobjectLevel = 4
-		$.modifiers[#Edit_Poly].SetSelection #Face #{}
--- 		$.modifiers[#Edit_Poly].Select #Face #{14}
-		$.modifiers[#Edit_Poly].Select #Face #{1..  cylinder_sides.text as integer * cylinder_segs.text as integer}
-			
-		$.modifiers[#Edit_Poly].SetOperation #SetMaterial
-		$.modifiers[#Edit_Poly].materialIDToSet = material_id1.text as integer - 1
-		$.modifiers[#Edit_Poly].Commit ()
-			
-		actionMan.executeAction 0 "40044"  -- Selection: Select Invert
-	--	$.modifiers[#Edit_Poly].SetSelection #Face #{cylinder_sides.text as integer + 1 .. cylinder_sides.text as integer + 2}
-			
-		$.modifiers[#Edit_Poly].SetOperation #SetMaterial
-		$.modifiers[#Edit_Poly].materialIDToSet = material_id2.text as integer - 1
-		$.modifiers[#Edit_Poly].Commit ()		
 	
-			
-		actionMan.executeAction 0 "40021"  -- Selection: Select All
-		$.modifiers[#Edit_Poly].SetSelection #Face #{1.. cylinder_sides.text as integer + 2}
-		modPanel.addModToSelection (Uvwmap ()) ui:on
-		$.modifiers[#UVW_Map].maptype = 1
-		$.modifiers[#UVW_Map].cap = on
-		$.modifiers[#UVW_Map].height =  uvw_height.text as float	
+	fn randomRotate selected =(			
 		
-		$.material = meditMaterials[material_number.text as integer] 
-
-		actionMan.executeAction 0 "50002"  -- Tools: Select and Rotate
-		toolMode.coordsys #view 
-	)
-		
-	
-		if random_rotate.state ==true then(
-		
-			rand = random 0 360
-			
+			rand = random 0 360			
 			if chk_x.state == true then (	
 				rot_box = eulerangles rand 0 0
 			--	rotate $ (angleaxis (random 0 360) [1,0,0])					
@@ -103,18 +58,43 @@ rollout woodTurner_roll "WOOD TURNER 1.1" (
 			else (	
 				rot_box = eulerangles  0  0 rand
 			--	rotate $ (angleaxis (random 0 360) [0,0,1])	
-			)
-			
+			)			
 			rotate $ rot_box
-		)	       
-
-		subobjectLevel = 0	
-		
-		undo_active = true
-	)	
+		  
+	)
 	
-	on btn_undo pressed do(	
-		if undo_active == true then (
+	fn setMap selected =(		
+		
+		modPanel.addModToSelection (Edit_Poly ()) ui:on
+				
+		subobjectLevel = 4
+		$.modifiers[#Edit_Poly].SetSelection #Face #{}
+		$.modifiers[#Edit_Poly].Select #Face #{1..  cylinder_sides.value as integer * cylinder_segs.value as integer}
+				
+		$.modifiers[#Edit_Poly].SetOperation #SetMaterial
+		$.modifiers[#Edit_Poly].materialIDToSet = material_id1.value   as integer - 1
+		$.modifiers[#Edit_Poly].Commit ()
+				
+		actionMan.executeAction 0 "40044"  -- Selection: Select Invert
+				
+		$.modifiers[#Edit_Poly].SetOperation #SetMaterial
+		$.modifiers[#Edit_Poly].materialIDToSet = material_id2.value   as integer - 1
+		$.modifiers[#Edit_Poly].Commit ()	
+				
+		actionMan.executeAction 0 "40043"  
+			
+		modPanel.addModToSelection (Uvwmap ()) ui:on
+		$.modifiers[#UVW_Map].maptype = 1
+		$.modifiers[#UVW_Map].cap = on
+		$.modifiers[#UVW_Map].height =  uvw_height.value   as float	
+			
+		$.material = meditMaterials[material_number.value   as integer] 
+
+		actionMan.executeAction 0 "50002"  -- Tools: Select and Rotate
+		toolMode.coordsys #view 		
+	)
+	
+	fn undo_object selected =(	
 			rand
 			if random_rotate.state == true then(
 				if chk_x.state == true then (	
@@ -132,7 +112,38 @@ rollout woodTurner_roll "WOOD TURNER 1.1" (
 			if rotate_only.state == false then ( 
 				deleteModifier $ 1
 				deleteModifier $ 1	
-			)	
+			)		
+	)		
+
+-------------------------------------------------------------USER INTERFACE-------------------------------------------------------------------------------
+	
+	on btn_getCylParam  pressed do(
+		try (
+			cylinder_sides.value   = $.sides as float
+			cylinder_segs.value   = $.heightsegs as float
+		)
+		catch (
+			messagebox "Unknown selected object."
+		) 
+	)
+
+	on btn_go pressed do(	
+		
+		if rotate_only.state != true then (
+			setMap on
+		)
+		
+		if random_rotate.state == true then(		
+			randomRotate  on   
+		)	
+		
+		subobjectLevel = 0			
+		undo_active = true
+	)	
+	
+	on btn_undo pressed do(			
+		if undo_active == true then (
+			undo_object on
 		)		
 		undo_active = false
 	)
