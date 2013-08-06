@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Wood Turner"
-!define PRODUCT_VERSION "1.0"
+!define PRODUCT_VERSION "1.2"
 !define PRODUCT_PUBLISHER "z209 company"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -76,9 +76,8 @@ FunctionEnd
 
 Section Uninstall
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\MacroScripts\Macro_WoodTurner.mcr"
+  Delete "$INSTDIR\scripts\Startup\WoodTurner.ms"
 
-  RMDir "$INSTDIR\MacroScripts"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   SetAutoClose true
