@@ -5,11 +5,9 @@ macroScript Wood_turner
 			Icon:#("UVWUnwrapTools",7)
 
 (
-rollout turnMap_roll "WOOD TURNER 1.0" (
+rollout woodTurner_roll "WOOD TURNER 1.0" (
 
 	group "UVW Map settings" (
-	--	edittext uvw_width "Width:" fieldWidth:100 labelOnTop:false 
-	--	edittext uvw_length "Length:" fieldWidth:100 labelOnTop:false 
 		edittext uvw_height "Height:" fieldWidth:100 labelOnTop:false text:"4000"  	
 	)	
 	
@@ -46,7 +44,7 @@ rollout turnMap_roll "WOOD TURNER 1.0" (
 		$.modifiers[#Edit_Poly].Commit ()
 			
 		actionMan.executeAction 0 "40044"  -- Selection: Select Invert
-		$.modifiers[#Edit_Poly].SetSelection #Face #{19..20}
+		$.modifiers[#Edit_Poly].SetSelection #Face #{cylinder_sides.text as integer + 1 .. cylinder_sides.text as integer + 2}
 			
 		$.modifiers[#Edit_Poly].SetOperation #SetMaterial
 		$.modifiers[#Edit_Poly].materialIDToSet = 1
@@ -54,7 +52,7 @@ rollout turnMap_roll "WOOD TURNER 1.0" (
 	
 			
 		actionMan.executeAction 0 "40021"  -- Selection: Select All
-		$.modifiers[#Edit_Poly].SetSelection #Face #{1..20}
+		$.modifiers[#Edit_Poly].SetSelection #Face #{1.. cylinder_sides.text as integer + 2}
 		modPanel.addModToSelection (Uvwmap ()) ui:on
 		$.modifiers[#UVW_Map].maptype = 1
 		$.modifiers[#UVW_Map].cap = on
@@ -66,8 +64,11 @@ rollout turnMap_roll "WOOD TURNER 1.0" (
 		toolMode.coordsys #view 
 	)
 		
-		rand = random 0 360
+	
 		if random_rotate.state ==true then(
+		
+			rand = random 0 360
+			
 			if chk_x.state == true then (	
 				rot_box = eulerangles rand 0 0
 			--	rotate $ (angleaxis (random 0 360) [1,0,0])					
@@ -80,17 +81,16 @@ rollout turnMap_roll "WOOD TURNER 1.0" (
 				rot_box = eulerangles  0  0 rand
 			--	rotate $ (angleaxis (random 0 360) [0,0,1])	
 			)
-		)	
-		
-        rotate $ rot_box
+			
+			rotate $ rot_box
+		)	       
 
 		subobjectLevel = 0	
-
 	)	
 	
 	on btn_undo pressed do(	
 		rand
-		if random_rotate.state ==true then(
+		if random_rotate.state == true then(
 			if chk_x.state == true then (	
 				rot_box = eulerangles -rand 0 0
 			)
@@ -136,8 +136,20 @@ rollout turnMap_roll "WOOD TURNER 1.0" (
 			chk_z.state = true
 		)
 	)	
+	
+	on random_rotate changed state do(
+		if state == true then(
+			chk_y.state = false
+			chk_z.state = false
+			chk_x.state = true
+		)else(
+			chk_y.state = false
+			chk_z.state = false
+			chk_x.state = false
+		)
+	)
 
 )
 global rand;
-createDialog turnMap_roll  180 300
+createDialog woodTurner_roll 180 300
 )
