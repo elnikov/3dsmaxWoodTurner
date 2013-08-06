@@ -40,7 +40,7 @@
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "setup.exe"
-InstallDir "C:\Program Files\Autodesk\3ds Max Design 2014\Autodesk\3ds Max Design 2014\"
+InstallDir "C:\Program Files\Autodesk\3ds Max Design 2014\"
 ShowInstDetails show
 ShowUnInstDetails show
 
@@ -49,9 +49,9 @@ Function .onInit
 FunctionEnd
 
 Section "MainSection" SEC01
-  SetOutPath "$INSTDIR\MacroScripts"
+  SetOutPath "$INSTDIR\scripts\Startup"
   SetOverwrite ifnewer
-  File "Macro_WoodTurner.mcr"
+  File "WoodTurner.ms"
 SectionEnd
 
 Section -Post
